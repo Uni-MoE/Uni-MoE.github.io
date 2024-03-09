@@ -14,6 +14,7 @@
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/jpswalsh/academicons@1/css/academicons.min.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.1/css/all.min.css">
   <link rel="stylesheet" href="./static/css/index.css">
+  <link rel="stylesheet" href="./static/css/own.css">
   <link rel="icon" href="./static/images/logo.png">
   <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
 
@@ -109,7 +110,8 @@
 
 
   <section class="hero">
-    <div class="hero-body">
+    <div class="hero-body-background">
+      <div class="hero-body-background-div"></div>
       <div class="container is-max-desktop">
         <div class="columns is-centered">
           <div class="column has-text-centered">
@@ -123,21 +125,6 @@
               </span>
               <span class="author-block">
                 <a href="https://faculty.hitsz.edu.cn/hubaotian" style="color:#F2A900;font-weight:normal;">Baotian Hu</a>,
-              </span>
-              <span class="author-block">
-                <a href="http://www.longyuewang.com/" style="color:#F2A900;font-weight:normal;">Longyue Wang</a>,
-              </span>
-              <span class="author-block">
-                <a href="url" style="color:#F2A900;font-weight:normal;">Wanqi Zhong</a>,
-              </span>
-              <span class="author-block">
-                <a href="https://forestlinma.com/" style="color:#F2A900;font-weight:normal;">Lin Ma</a>,
-              </span>
-              <span class="author-block">
-                <a href="https://whluo.github.io/" style="color:#F2A900;font-weight:normal;">Wenhan Luo</a>,
-              </span>
-              <span class="author-block">
-                <a href="https://faculty.hitsz.edu.cn/MinZhang" style="color:#F2A900;font-weight:normal;">Min Zhang</a>
               </span>
             </div>
 
@@ -259,7 +246,7 @@
     </div>
   </section>
 
-  <section class="section">
+  <section class="section" style="background-color:#efeff081">
     <div class="container is-max-desktop">
 
         <div class="columns is-centered has-text-centered">
@@ -315,16 +302,20 @@
 
 
 <div class="container mt-5">
+    <div class="columns is-centered has-text-centered">
+        <h2 class="title is-2">Case Show</h2>
+        <br>
+    </div>
     <!-- <h2 class="text-center mb-5">Who's GPT-4's favorite? Battles between State-of-the-Art Chatbots</h2> -->
     <!-- Selection -->
-    <div class="form-row" style="justify-content: flex-end;">
+    <div class="form-row" style="justify-content: center;">
       <div class="form-group col-md-1">
-        <div class="col-md-2" style="width: 100%"><label>&nbsp;</label></div>
+        <!-- <div class="col-md-2" style="width: 100%"><label>&nbsp;</label></div> -->
         <div class="btn-group" role="group" aria-label="Left and Right Controller"
           style="width: 100%;align-items: flex-end;justify-content: center;flex-direction: row;display: flex;">
-          <button type="button" class="form-control btn btn-primary" id="prev-question"><i
+          <button type="button" class="form-control btn btn-primary" id="prev-question" style="background-color: gray; color: white; border: 1px solid white;"><i
               class="material-icons">keyboard_arrow_left</i></button>
-          <button type="button" class="form-control btn btn-primary" id="next-question"><i
+          <button type="button" class="form-control btn btn-primary" id="next-question" style="background-color: gray; color: white; border: 1px solid white;"><i
               class="material-icons">keyboard_arrow_right</i></button>
 
         </div>
@@ -333,7 +324,7 @@
 
     <!-- Question Card -->
     <div style="display: flex; justify-content: center; align-items: center;">
-      <div class="card mb-4" style="width: 100%; display: flex; align-items: center;">
+      <div class="card mb-4" style="width: 80%; display: flex; align-items: center;">
         <!-- <p><b>Description:</b> Monalisa is a famous painting by Leonardo da Vinci. </p> -->
 
         <div class="card-body" id="selected-question" style="display: flex; height: 80vh;">
@@ -367,7 +358,7 @@
     </div>
   </section>
   
-  <section class="section" id="Acknowledgement">
+  <section class="section" id="Acknowledgement" style="background-color:#efeff081">
     <div class="container is-max-desktop content">
       <h2 class="title">Acknowledgement</h2>
       <p>
