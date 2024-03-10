@@ -12,18 +12,22 @@
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.1/css/bulma.min.css">
   <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/jpswalsh/academicons@1/css/academicons.min.css">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.1/css/all.min.css">
+<!--   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.1/css/all.min.css"> -->
   <link rel="stylesheet" href="./static/css/index.css">
   <link rel="stylesheet" href="./static/css/own.css">
   <link rel="icon" href="./static/images/logo.png">
   <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
 
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
-  <script defer src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.1/js/all.min.js"></script>
+<!--   <script defer src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.1/js/all.min.js"></script> -->
   <script type="module" src="https://gradio.s3-us-west-2.amazonaws.com/3.27.0/gradio.js"></script>
 </head>
 
 <style>
+  .fa-user:before{content:url("./static/images/user.png")}
+  .fa-robot:before{content:url("./static/images/bot.png")}
+  .fas{-moz-osx-font-smoothing:grayscale;-webkit-font-smoothing:antialiased;display:inline-block;font-style:normal;font-variant:normal;text-rendering:auto;line-height:1}
+  .fa-2x{font-size:2em}
   .expandable-card .card-text-container {
     max-height: 200px;
     overflow-y: hidden;
@@ -345,8 +349,8 @@
     </div>
 
     <!-- Question Card -->
-    <div style="display: flex; justify-content: center; align-items: center;">
-      <div class="card mb-4" style="width: 80%; display: flex; align-items: center;box-sizing: border-box;border-width: 4px;border-style: solid;border-color: #f66c0f;border-radius: 11px;padding: 25px;padding-top: 30px;padding-bottom: 30px;">
+    <div style="display: flex; justify-content: center; align-items: center; ">
+      <div class="card mb-4" style="width: 80%; display: flex; align-items: center;box-sizing: border-box;border-width: 4px;border-style: solid;border-color: #f66c0f;border-radius: 11px;padding: 25px;padding-top: 30px;padding-bottom: 30px; background-color:#fff3db; ">
         <!-- <p><b>Description:</b> Monalisa is a famous painting by Leonardo da Vinci. </p> -->
 
         <div class="card-body" id="selected-question" style="display: flex; height: 80vh;">
@@ -420,7 +424,7 @@
 
       // wrap text in pre tag to preserve whitespace and line breaks
       var pre_text = document.createElement("pre");
-      pre_text.style = "background-color: white; font-size: 18px; font-family: Arial; padding: 0; margin: 0; white-space: pre-wrap; word-wrap: break-word;";
+      pre_text.style = "background-color: white; font-size: 18px; font-family: Arial; padding: 0; margin: 0; white-space: pre-wrap; word-wrap: break-word; background: transparent; ";
       var paraText = document.createTextNode(text);
       pre_text.appendChild(paraText);
 
@@ -439,11 +443,16 @@
         img.style = "max-width: 100%; max-height: 300px;"; // Adjust the style as needed
         para.appendChild(img);
       }
-      var br1 = document.createElement("br");
-      para.appendChild(br1);
       // Add audio if imageSrc[1] is provided
       //<audio playsinline="" controls=""> <source type="audio/wav" src="./static/images/test.wav"></audio>
       if (imageSrc && imageSrc[1]!='' && imageSrc.length >1) {
+        var br1 = document.createElement("br");
+        para.appendChild(br1);
+        if (imageSrc && imageSrc[0]!=''){
+          var spc = document.createElement("div");
+          spc.style = "height: 20px;"
+          para.appendChild(spc);
+        }
         var aud = document.createElement("audio");
         aud.playsinline = "true";
         aud.controls = "true";
@@ -455,11 +464,12 @@
         aud.appendChild(inaud);
         para.appendChild(aud);
       }
-      var br2 = document.createElement("br");
-      para.appendChild(br2);
+      
       // Add video if imageSrc[2] is provided
       // <video src="./static/images/demo9/r37zpq_g.mp4" style="display: inline-block;" width="500" playsinline="" controls=""></video> 
       if (imageSrc && imageSrc[2]!='' && imageSrc.length >2) {
+        var br2 = document.createElement("br");
+         para.appendChild(br2);
         var vid = document.createElement("video");
         vid.src = imageSrc[2];
         vid.style = "display: inline-block;";
