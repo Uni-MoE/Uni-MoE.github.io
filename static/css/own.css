@@ -4,7 +4,7 @@
     align-items:center;
     display:grid;
     position: relative;
-    background: url("../images/sampled_output1.gif") no-repeat center center;
+    background: url("../images/sampled_output2.gif") no-repeat center center;
     background-size: cover;
 }
 @media screen and (max-width: 768px) {
