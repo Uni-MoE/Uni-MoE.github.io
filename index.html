@@ -248,11 +248,17 @@
           <h2 class="title is-2">Abstract</h2>
           <div class="content has-text-justified">
             <p>
-                The Mixture of Experts (MoE) architecture has emerged as a promising approach for scaling up Large Language Models
-                (LLMs), facilitating more efficient training and inference. Regarding this potential, our work extends the MoE architecture to develop <b>Uni-MoE</b>, a unified Multimodal LLM designed to process a wide array of modalities, including audio, speech, images, text, and video. Specifically, our methodology enriches the transformer architecture of LLMs by incorporating multimodal experts, comprising: 1. a shared self-attention mechanism for all modalities, 2. modality-specific experts derived from feed-forward networks, and 3. a sparse routing mechanism for allocating token-level expert attention. We evaluate our instruction-tuned, MoE-based MLLM on a comprehensive set of multimodal datasets. The results underscore Uni-MoE's three principal benefits: a. superior performance compared to existing dense multimodal models with single-expert configurations across various benchmarks; b. enhanced multi-expert collaboration and generalization through the pre-training of modality-specific experts, rather than applying a generic MoE model directly to heterogeneous data; c. exceptional ability in handling complex cross-modality tasks such as the High School English Listening Test and Video
-                Comprehension, demonstrating effective complexity management and reduced bias in handling mixed multimodal datasets. Our findings suggest the significant potential of MoE frameworks in the advancement of MLLMs and encourage further research in this domain. The code is available at <a href="https://github.com/HITsz-TMG/UMOE-Scaling-Unified-Multimodal-LLMs">https://github.com/HITsz-TMG/UMOE-Scaling-Unified-Multimodal-LLMs</a>.
+                The Mixture of Experts (MoE) architecture has emerged as a promising approach for scaling up Large Language Models (LLMs), facilitating more efficient training and inference. 
+                Regarding this potential, our work extends the MoE architecture to develop <b>Uni-MoE</b>, a unified Multimodal LLM designed to process a wide array of modalities, including audio, speech, images, text, and video. 
+                Specifically, our methodology enriches the transformer architecture of LLMs by incorporating multimodal experts, comprising: 
+                1). a shared self-attention mechanism for all modalities, 2). modality-specific experts derived from feed-forward networks, and 3). a sparse routing mechanism for allocating token-level expert attention. 
+                 We evaluate our instruction-tuned, MoE-based MLLM on a comprehensive set of multimodal datasets. The results underscore Uni-MoE's three principal benefits: 
+                a). superior performance compared to existing dense multimodal models with single-expert configurations across various benchmarks; 
+                b). enhanced multi-expert collaboration and generalization through the pre-training of modality-specific experts, rather than applying a generic MoE model directly to heterogeneous data; 
+                c). exceptional ability in handling complex cross-modality tasks such as the High School English Listening Test and Video Comprehension, demonstrating effective complexity management and reduced bias in handling mixed multimodal datasets. 
+                Our findings suggest the significant potential of MoE frameworks in the advancement of MLLMs and encourage further research in this domain. 
+                The code is available at <a href="https://github.com/HITsz-TMG/UMOE-Scaling-Unified-Multimodal-LLMs">https://github.com/HITsz-TMG/UMOE-Scaling-Unified-Multimodal-LLMs</a>.
            </p>
-  
           </div>
         </div>
       </div>
@@ -278,8 +284,8 @@
                     <figcaption>
                         <p style="text-align: center;">
                             <font color="061E61">
-                                <b>Figure 1:</b> Architecture of Uni-MoE. By connecting LLM with multimodal encoders, Uni-MoE shows universal
-                                multimodal understanding capability.
+                                <b>Figure 1:Architecture of Uni-MoE</b>. By connecting LLM with multimodal encoders, Uni-MoE shows unified multimodal understanding capability. 
+                                It mainly employs the MoE architecture to achieve stable and powerful performance on any multi-modal information input.
                             </font>
                         </p>
                     </figcaption>
@@ -299,9 +305,11 @@
                         </li>
                         <li>
                             <b> Tuning Uni-MoE.</b>
-                            The concluding stage involves
-                            integrating the expertly tuned weights from Stage 2 into the MoE layers. We then proceed to jointly fine-tune the MLLMs utilizing mixed multimodal instructional data. The progression of the training process, as reflected by the loss
-                            curves, is depicted in Figure 3. Comparative analysis between MoE configurations reveals that experts refined during Stage 2 achieve quicker convergence and display enhanced stability on mixed-modality datasets. Furthermore, in scenarios involving complex mixed-modal data, encompassing video, audio, images, and text, the model employing four experts demonstrates reduced loss variability and more consistent training performance than its two-expert counterpart.
+                            The concluding stage involves integrating the expertly tuned weights from Stage 2 into the MoE layers. 
+                            We then proceed to jointly fine-tune the MLLMs utilizing mixed multimodal instructional data. The progression of the training process, as reflected by the loss
+                            curves, is depicted in Figure 3 (paper). 
+                            Comparative analysis between MoE configurations reveals that experts refined during Stage 2 achieve quicker convergence and display enhanced stability on mixed-modality datasets. 
+                            Furthermore, in scenarios involving complex mixed multimodal data, encompassing video, audio, images, and text, our model employing four modality-specific experts demonstrates reduced loss variability and more consistent training performance than its two-expert counterpart.
                         </li>
                     </ul>
                     </p>
