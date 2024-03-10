@@ -338,7 +338,7 @@
 
     <!-- Question Card -->
     <div style="display: flex; justify-content: center; align-items: center;">
-      <div class="card mb-4" style="width: 80%; display: flex; align-items: center;">
+      <div class="card mb-4" style="width: 80%; display: flex; align-items: center;box-sizing: border-box;border-width: 4px;border-style: solid;border-color: #f66c0f;border-radius: 11px;padding: 25px;padding-top: 30px;padding-bottom: 30px;">
         <!-- <p><b>Description:</b> Monalisa is a famous painting by Leonardo da Vinci. </p> -->
 
         <div class="card-body" id="selected-question" style="display: flex; height: 80vh;">
@@ -488,6 +488,14 @@
     // 
     const conversations = [
       {
+        "description": "leopard",
+        "turns": [
+          ["User", "", "./static/images/3.jpg"],
+          ["User", "Describe the image.​​"],
+          ["Uni-MoE", "The image features a large leopard walking across a grassy area, close to a body of water. The leopard is positioned in the center of the scene, with its reflection visible in the water. The water appears to be a lake or a pond, providing a serene backdrop for the leopard's stroll."],
+        ]
+      },
+      {
         "description": "Concert",
         "turns": [
           ["User", "", "./static/images/blank.png", "./static/images/1.mp3"],
@@ -501,14 +509,6 @@
           ["User", "", "", "./static/images/2.mp3"],
           ["User", "Name all the instruments you can hear. ​​"],
           ["Uni-MoE", "Accordion, drums, guitars, trumpets, violins, and cellos."],
-        ]
-      },
-      {
-        "description": "leopard",
-        "turns": [
-          ["User", "", "./static/images/3.jpg"],
-          ["User", "Describe the image.​​"],
-          ["Uni-MoE", "The image features a large leopard walking across a grassy area, close to a body of water. The leopard is positioned in the center of the scene, with its reflection visible in the water. The water appears to be a lake or a pond, providing a serene backdrop for the leopard's stroll."],
         ]
       },
       {
