@@ -26,6 +26,7 @@
 <style>
   .fa-myuser:before{content:url("./static/images/user.png")}
   .fa-myrobot:before{content:url("./static/images/bot.png")}
+  .fa-mylogo:before{content:url("./static/images/logo.png")}
   .fas{-moz-osx-font-smoothing:grayscale;-webkit-font-smoothing:antialiased;display:inline-block;font-style:normal;font-variant:normal;text-rendering:auto;line-height:1}
   .fa-2x{font-size:2em}
   .expandable-card .card-text-container {
@@ -412,7 +413,7 @@
       span.className = "icon is-large";
 
       var icon = document.createElement("i");
-      icon.className = "" + (sender === "User" ? " fa-myuser " : (sender === "Uni-MoE" || sender === "X-Instruct") ? " fa-myrobot" : "");
+      icon.className = "" + (sender === "User" ? " fa-myuser " : sender === "Uni-MoE" ? " fa-mylogo " : sender === "X-Instruct" ? " fa-myrobot" : "");
 
       var media = document.createElement("div");
       media.className = "media-content";
