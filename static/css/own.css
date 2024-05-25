@@ -1,4 +1,4 @@
-.hero-body{
+.hero-body-old{
     /*padding:9rem 1.5rem;*/
     height: 600px;
     align-items:center;
@@ -27,7 +27,7 @@
     /*background: linear-gradient(to bottom, rgb(255 255 255 / 0%), rgb(194 194 194));*/
 }
 
-.hero-body-background-div {
+.hero-body-background-div-old {
     position: absolute;
     top: 0;
     left: 0;
