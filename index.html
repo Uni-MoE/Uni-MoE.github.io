@@ -1,0 +1,1027 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <meta name="description" content=" Scaling Unified Multimodal LLMs with Mixture of Experts">
+  <meta name="keywords" content="multi-modal model with moe">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Uni-MoE</title>
+
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Google+Sans|Noto+Sans|Castoro">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.1/css/bulma.min.css">
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/jpswalsh/academicons@1/css/academicons.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.1/css/all.min.css">
+  <link rel="stylesheet" href="./static/css/index.css">
+  <link rel="stylesheet" href="./static/css/own.css">
+
+  <link rel="stylesheet" href="./static/css/index-gradio.css">
+  <link rel="stylesheet" href="./static/css/live_theme.css">
+  <link rel="icon" href="./static/images/logo.png">
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+  <script defer src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.1/js/all.min.js"></script>
+  <script type="module" src="https://gradio.s3-us-west-2.amazonaws.com/3.27.0/gradio.js"></script>
+</head>
+
+<style>
+  .fa-myuser:before{content:url("./static/images/user.png")}
+  .fa-myrobot:before{content:url("./static/images/logo_small.png")}
+  .fa-mylogo:before{content:url("./static/images/logo_small.png")}
+  .fas{-moz-osx-font-smoothing:grayscale;-webkit-font-smoothing:antialiased;display:inline-block;font-style:normal;font-variant:normal;text-rendering:auto;line-height:1}
+  .fa-2x{font-size:2em}
+  .expandable-card .card-text-container {
+    max-height: 200px;
+    overflow-y: hidden;
+    position: relative;
+  }
+
+  .expandable-card.expanded .card-text-container {
+    max-height: none;
+  }
+
+  .expand-btn {
+    position: relative;
+    display: none;
+    background-color: rgba(255, 255, 255, 0.8);
+    /* margin-top: -20px; */
+    /* justify-content: center; */
+    color: #510c75;
+    border-color: transparent;
+  }
+
+  .expand-btn:hover {
+    background-color: rgba(200, 200, 200, 0.8);
+    text-decoration: none;
+    border-color: transparent;
+    color: #510c75;
+  }
+
+  .expand-btn:focus {
+    outline: none;
+    text-decoration: none;
+  }
+
+  .expandable-card:not(.expanded) .card-text-container:after {
+    content: "";
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 90px;
+    background: linear-gradient(rgba(255, 255, 255, 0.2), rgba(255, 255, 255, 1));
+  }
+
+  .expandable-card:not(.expanded) .expand-btn {
+    margin-top: -40px;
+  }
+
+  .card-body {
+    padding-bottom: 5px;
+  }
+
+  .vertical-flex-layout {
+    justify-content: center;
+    align-items: center;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+  }
+
+  .figure-img {
+    max-width: 100%;
+    height: auto;
+  }
+
+  .adjustable-font-size {
+    font-size: calc(0.5rem + 2vw);
+  }
+
+  .chat-history {
+    flex-grow: 1;
+    overflow-y: auto;
+    /* overflow-x: hidden; */
+    padding: 5px;
+    border-bottom: 1px solid #ccc;
+    margin-bottom: 10px;
+  }
+
+  #gradio pre {
+    background-color: transparent;
+  }
+</style>
+
+<body>
+
+
+  <section class="hero">
+    <div class="hero-body">
+      <div class="hero-body-background-div"></div>
+      <div class="container is-max-desktop">
+        <div class="columns is-centered">
+          <div class="column has-text-centered">
+            <h1 class="title is-1 publication-title" style="color:black;" ><img src="./static/images/logo.png" width="110" height="110" style="margin-right: 10px;">Uni-MoE:</h1>
+            <h1 class="title is-2 publication-title" style="width:1200px">Scaling Unified Multimodal LLMs with Mixture of Experts</h1>
+            <div class="is-size-5 publication-authors">
+              <span class="author-block">
+                <a href="https://yunxinli.github.io" style="color:black;font-weight:normal;"><b>Yunxin Li</b></a>,
+              </span>
+              <span class="author-block">
+                <a href="url" style="color:black;font-weight:normal;"><b>Shenyuan Jiang</b></a>,
+              </span>
+              <span class="author-block">
+                <a href="https://faculty.hitsz.edu.cn/hubaotian" style="color:black;font-weight:normal;"><b>Baotian Hu</b></a>,
+              </span>
+              <span class="author-block">
+                <a href="http://www.longyuewang.com/" style="color:black;font-weight:normal;"><b>Longyue Wang</b></a>,
+              </span><br>
+              <span class="author-block">
+                <a href="url" style="color:black;font-weight:normal;"><b>Wanqi Zhong</b></a>,
+              </span>
+              <span class="author-block">
+                <a href="https://whluo.github.io/" style="color:black;font-weight:normal;"><b>Wenhan Luo</b></a>,
+              </span>
+              <span class="author-block">
+                <a href="https://forestlinma.com/" style="color:black;font-weight:normal;"><b>Lin Ma</b></a>,
+              </span>
+              <span class="author-block">
+                <a href="https://faculty.hitsz.edu.cn/MinZhang" style="color:black;font-weight:normal;"><b>Min Zhang</b></a>
+              </span>
+            </div>
+            <br>
+            <div class="is-size-5 publication-authors">
+              <span class="author-block"><b style="color:black; font-weight:normal">Harbin Institute of Technology, Shenzhen </b></span>
+            </div>
+
+          
+          <!-- <div class="column has-text-centered">
+            <h3 class="title is-3 publication-title">Improved Baselines with Visual Instruction Fine-tuning</h3>
+            <div class="is-size-5 publication-authors">
+              <span class="author-block">
+                <a href="https://hliu.cc/" style="color:#f68946;font-weight:normal;">Haotian Liu<sup>*</sup></a>,
+              </span>
+              <span class="author-block">
+                <a href="https://chunyuan.li/" style="color:#008AD7;font-weight:normal;">Chunyuan Li<sup>*</sup></a>,
+              </span>
+              <span class="author-block">
+                <a href="https://yuheng-li.github.io" style="color:#008AD7;font-weight:normal;">Yuheng Li</a>,
+              </span>
+              <span class="author-block">
+                <a href="https://pages.cs.wisc.edu/~yongjaelee/" style="color:#f68946;font-weight:normal;">Yong Jae
+                  Lee</a>
+              </span>
+            </div>
+
+            <div class="is-size-5 publication-authors">
+              <span class="author-block"><b style="color:#f68946; font-weight:normal">&#x25B6 </b> University of
+                Wisconsin-Madison</b></span>
+              <span class="author-block"><b style="color:#008AD7; font-weight:normal">&#x25B6 </b> Microsoft Research</span>
+            </div> -->
+
+            <div class="column has-text-centered">
+              <div class="publication-links">
+                <span class="link-block">
+                  <a href="https://arxiv.org/abs/2405.11273" target="_blank"
+                    class="external-link button is-normal is-rounded is-dark">
+                    <span class="icon">
+                      <i class="ai ai-arxiv"></i>
+                    </span>
+                    <span>arXiv</span>
+                  </a>
+                </span>
+                <span class="link-block">
+                  <a href="https://github.com/HITsz-TMG/UMOE-Scaling-Unified-Multimodal-LLMs" target="_blank"
+                    class="external-link button is-normal is-rounded is-dark">
+                    <span class="icon">
+                      <i class="fab fa-github"></i>
+                    </span>
+                    <span>Code</span>
+                  </a>
+                </span>
+                <span class="link-block">
+                  <a href="url" target="_blank"
+                    class="external-link button is-normal is-rounded is-dark">
+                    <span class="icon">
+                      <i class="far fa-images"></i>
+                    </span>
+                    <span>Demo</span>
+                  </a>
+                </span>
+                <span class="link-block">
+                  <a href="https://github.com/HITsz-TMG/UMOE-Scaling-Unified-Multimodal-LLMs?tab=readme-ov-file#%EF%B8%8F-dataset" target="_blank"
+                    class="external-link button is-normal is-rounded is-dark">
+                    <span class="icon">
+                      <i class="fas fa-database"></i>
+                    </span>
+                    <span>Dataset</span>
+                  </a>
+                </span>
+                <span class="link-block">
+                  <a href="https://github.com/HITsz-TMG/UMOE-Scaling-Unified-Multimodal-LLMs?tab=readme-ov-file#%EF%B8%8F-uni-moe-weights" target="_blank"
+                    class="external-link button is-normal is-rounded is-dark">
+                    <span class="icon">
+                      <i class="fas fa-share-square"></i>
+                    </span>
+                    <span>Model</span>
+                  </a>
+                </span>
+
+
+                
+
+                <!-- <span class="link-block">
+                <a href="#"
+                   class="external-link button is-normal is-rounded is-dark">
+                  <span class="icon">
+                    <i class="fab fa-youtube"></i>
+                  </span>
+                  <span>Video</span>
+                  </a>
+              </span> -->
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+  
+  <section class="section" style="background-color:#efeff081">
+        <div class="container is-max-desktop">
+            <!-- Demo Presentation. -->
+            <div class="columns is-centered has-text-centered">
+              <div class="column is-11">
+                    <h2 class="title is-2">Demo Presentation</h2>
+                    <div class="publication-video">
+                        <iframe src="https://www.youtube.com/embed/RsumcWsYNyc"
+                                frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
+                    </div>
+                </div>
+            </div>
+            <!--/ Demo Presentation. -->
+        </div>
+    </section>
+  
+  <section class="section">
+    <div class="container is-max-desktop">
+      <!-- Abstract. -->
+      <div class="columns is-centered has-text-centered">
+        <div class="column is-four-fifths">
+          <h2 class="title is-2">Abstract</h2>
+          <div class="content has-text-justified">
+            <p>
+                The Mixture of Experts (MoE) architecture has emerged as a promising approach for scaling up Large Language Models (LLMs), facilitating more efficient training and inference. 
+                Regarding this potential, our work extends the MoE architecture to develop <b>Uni-MoE</b>, a unified Multimodal LLM designed to process a wide array of modalities, including audio, speech, images, text, and video. 
+                Specifically, our methodology enriches the transformer architecture of LLMs by incorporating multimodal experts, comprising: 
+                1). a shared self-attention mechanism for all modalities, 2). modality-specific experts derived from feed-forward networks, and 3). a sparse routing mechanism for allocating token-level expert attention. 
+                 We evaluate our instruction-tuned, MoE-based MLLM on a comprehensive set of multimodal datasets. The results underscore Uni-MoE's three principal benefits: 
+                a). superior performance compared to existing dense multimodal models with single-expert configurations across various benchmarks; 
+                b). enhanced multi-expert collaboration and generalization through the pre-training of modality-specific experts, rather than applying a generic MoE model directly to heterogeneous data; 
+                c). exceptional ability in handling complex cross-modality tasks such as the High School English Listening Test and Video Comprehension, demonstrating effective complexity management and reduced bias in handling mixed multimodal datasets. 
+                Our findings suggest the significant potential of MoE frameworks in the advancement of MLLMs and encourage further research in this domain. 
+                The code is available at <a href="https://github.com/HITsz-TMG/UMOE-Scaling-Unified-Multimodal-LLMs">https://github.com/HITsz-TMG/UMOE-Scaling-Unified-Multimodal-LLMs</a>.
+           </p>
+          </div>
+        </div>
+      </div>
+        
+    </div>
+  </section>
+
+  <section class="section" style="background-color:#efeff081">
+    <div class="container is-max-desktop">
+
+        <div class="columns is-centered has-text-centered">
+            <h2 class="title is-2">Architecture</h2>
+            <br>
+        </div>
+
+        <!-- Architecture -->
+        <div class="columns is-centered">
+            <div class="column is-11">
+                <div class="content has-text-justified">
+                    <img class="columns is-centered has-text-centered" src="./static/images/model.png" alt="Teaser" width="95%"
+                         style="margin:0 auto">
+                    <br>
+                    <figcaption>
+                        <p style="text-align: center;">
+                            <font color="061E61">
+                                <b>Figure 1:Architecture of Uni-MoE</b>. By connecting LLM with multimodal encoders, Uni-MoE shows unified multimodal understanding capability. 
+                                It mainly employs the MoE architecture to achieve stable and powerful performance on any multi-modal information input.
+                            </font>
+                        </p>
+                    </figcaption>
+                    <br>
+                    <p>
+                    <ul>
+                        <li>
+                            <b>Cross-Modality Alignment.</b> In the initial stage, we aim to establish connectivity between different modalities and linguistics. We achieve this by constructing connectors that translate various modal data into soft tokens within the
+                            language space. The primary objective here is minimizing generative entropy loss. As illustrated in the upper section of
+                            Figure 1, the LLM is optimized to generate descriptions for inputs across modalities and only the connectors are subject to training. This approach ensures seamless integration of all
+                            modalities within a unified language framework, facilitating mutual comprehension by the LLM.
+                        </li>
+                        <li>
+                            <b>Training Single-Modality Expert.</b>
+                            This stage concentrates on developing single-modality experts through dedicated training on specific cross-modal data. The goal
+                            is to refine each expert's proficiency within its respective domain, thereby enhancing the overall performance of the MoE system on diverse multimodal data. While maintaining generative entropy loss as the focal training metric, we tailor the FFN to align more closely with the characteristics of the targeted modality.
+                        </li>
+                        <li>
+                            <b> Tuning Uni-MoE.</b>
+                            The concluding stage involves integrating the expertly tuned weights from Stage 2 into the MoE layers. 
+                            We then proceed to jointly fine-tune the MLLMs utilizing mixed multimodal instructional data. The progression of the training process, as reflected by the loss
+                            curves, is depicted in Figure 3 (paper). 
+                            Comparative analysis between MoE configurations reveals that experts refined during Stage 2 achieve quicker convergence and display enhanced stability on mixed-modality datasets. 
+                            Furthermore, in scenarios involving complex mixed multimodal data, encompassing video, audio, images, and text, our model employing four modality-specific experts demonstrates reduced loss variability and more consistent training performance than its two-expert counterpart.
+                        </li>
+                    </ul>
+                    </p>
+                    <br>
+                </div>
+                <br/>
+            </div>
+        </div>
+    </div>
+    
+</section>
+
+
+<section class="section">
+  <div class="container is-max-desktop">
+
+      <div class="columns is-centered has-text-centered">
+          <h2 class="title is-2">Demonstrations</h2>
+      </div>
+
+      <div class="columns is-centered">
+          <div class="column is-full-width">
+              <!--            Example-1-->
+              <h3 class="title is-4" style="margin-top: 3em">• Example-1: Text + Image</h3>
+              <div class="content has-text-justified" style="width: 70pm">
+
+                  <div class="wrapper svelte-nab2ao"
+                      style="box-sizing: border-box;border-width: 2px;border-style: solid;border-color: #f66c0f;border-radius: 11px;padding: 25px;padding-top: 30px;padding-bottom: 30px;">
+
+                      <div class="message-wrap svelte-1uvwjgr" style="width: 100%;">
+
+                          <div class="message-row user-row svelte-1uvwjgr" style="width: 100%;">
+                              <div class="avatar-container svelte-1uvwjgr">
+                                  <img class="avatar-image svelte-1uvwjgr" src="./static/images/user.png"
+                                      alt="avatar-user">
+                              </div>
+                              <div data-testid="user" class="message user svelte-1uvwjgr" dir="ltr"
+                                  style="border-style: solid;">
+                                  <!-- 下面的span靠右对齐 -->
+                                  <span class="md svelte-9tftx4 chatbot" style="text-align: left;">
+                                      <p>Describe the image in detail.</p>
+                                      <img style="display: inline-block;width: 500px;max-height: 1000px;float: right;"
+                                          src="./static/images/3.jpg">
+                                  </span>
+                              </div>
+                          </div>
+                          <div class="message-row bot-row svelte-1uvwjgr">
+                            <div class="avatar-container svelte-1uvwjgr">
+                                <img class="avatar-image svelte-1uvwjgr" src="./static/images/logo_small.png"
+                                    alt="avatar-bot">
+                            </div>
+                            <div data-testid="bot" class="message bot svelte-1uvwjgr" dir="ltr"
+                                style="border-style: solid;">
+                                <span class="md svelte-9tftx4 chatbot">
+                                    <p style="color: black; font-size: 1.0em;">
+                                      The image features a large leopard walking across a grassy area, close to a body of water. The leopard is positioned in the center of the scene, with its reflection visible in the water. The water appears to be a lake or a pond, providing a serene backdrop for the leopard's stroll.
+                                    </p>
+                                </span>
+                            </div>
+                        </div>
+
+                      </div>
+                  </div>
+              </div>
+              <!--          End  Example-1-->
+
+
+              <!--            Example-2-->
+              <h3 class="title is-4" style="margin-top: 3em">• Example-2: Text + Audio</h3>
+              <div class="content has-text-justified" style="width: 70pm">
+
+                  <div class="content has-text-justified" style="width: 70pm;margin-top: 1.5em">
+
+                      <div class="wrapper svelte-nab2ao"
+                          style="box-sizing: border-box;border-width: 2px;border-style: solid;border-color: #f66c0f;border-radius: 11px;padding: 25px;padding-top: 30px;padding-bottom: 30px;">
+
+                          <div class="message-wrap svelte-1uvwjgr" style="width: 100%;">
+
+                              <div class="message-row user-row svelte-1uvwjgr" style="width: 100%;">
+                                  <div class="avatar-container svelte-1uvwjgr">
+                                      <img class="avatar-image svelte-1uvwjgr" src="./static/images/user.png"
+                                          alt="avatar-user">
+                                  </div>
+                                  <div data-testid="user" class="message user svelte-1uvwjgr" dir="ltr"
+                                      style="border-style: solid;">
+                                      <!-- 下面的span靠右对齐 -->
+                                      <span class="md svelte-9tftx4 chatbot" style="text-align: left;">
+                                          <p>Where is this sound take place?​​</p>
+                                          <p><audio playsinline="" controls="">
+                                                  <source type="audio/mp3"
+                                                      src="./static/images/1.mp3">
+                                              </audio>
+                                          </p>
+                                      </span>
+                                  </div>
+                              </div>
+
+
+                              <div class="message-row bot-row svelte-1uvwjgr">
+                                  <div class="avatar-container svelte-1uvwjgr">
+                                      <img class="avatar-image svelte-1uvwjgr" src="./static/images/logo_small.png"
+                                          alt="avatar-bot">
+                                  </div>
+                                  <div data-testid="bot" class="message bot svelte-1uvwjgr" dir="ltr"
+                                      style="border-style: solid;">
+                                      <span class="md svelte-9tftx4 chatbot">
+                                          <p>Concert.</p>
+                                      </span>
+                                  </div>
+                              </div>
+
+                          </div>
+                      </div>
+                  </div>
+
+                  <div class="wrapper svelte-nab2ao"
+                      style="box-sizing: border-box;border-width: 2px;border-style: solid;border-color: #f66c0f;border-radius: 11px;padding: 25px;padding-top: 30px;padding-bottom: 30px;">
+
+                      <div class="message-wrap svelte-1uvwjgr" style="width: 100%;">
+
+                          <div class="message-row user-row svelte-1uvwjgr" style="width: 100%;">
+                              <div class="avatar-container svelte-1uvwjgr">
+                                  <img class="avatar-image svelte-1uvwjgr" src="./static/images/user.png"
+                                      alt="avatar-user">
+                              </div>
+                              <div data-testid="user" class="message user svelte-1uvwjgr" dir="ltr"
+                                  style="border-style: solid;">
+                                  <!-- 下面的span靠右对齐 -->
+                                  <span class="md svelte-9tftx4 chatbot" style="text-align: left;">
+                                      <p>Name all the instruments you can hear.</p>
+                                      <p><audio playsinline="" controls="">
+                                              <source type="audio/mp3" src="./static/images/2.mp3">
+                                          </audio>
+                                      </p>
+                                  </span>
+                              </div>
+                          </div>
+
+                          <div class="message-row bot-row svelte-1uvwjgr">
+                              <div class="avatar-container svelte-1uvwjgr">
+                                  <img class="avatar-image svelte-1uvwjgr" src="./static/images/logo_small.png"
+                                      alt="avatar-bot">
+                              </div>
+                              <div data-testid="bot" class="message bot svelte-1uvwjgr" dir="ltr"
+                                  style="border-style: solid;">
+                                  <span class="md svelte-9tftx4 chatbot">
+                                      <p>Accordion, drums, guitars, trumpets, violins, and cellos.</p>
+                                  </span>
+                              </div>
+                          </div>
+
+                      </div>
+                  </div>
+              </div>
+              <!--          End  Example-2-->
+
+              <!--            Example-3-->
+              <h3 class="title is-4" style="margin-top: 3em">• Example-3: Speech Instruction + Image</h3>
+
+              <div class="content has-text-justified" style="width: 70pm">
+
+                  <div class="content has-text-justified" style="width: 70pm;margin-top: 1.5em">
+
+                      <div class="wrapper svelte-nab2ao"
+                          style="box-sizing: border-box;border-width: 2px;border-style: solid;border-color: #f66c0f;border-radius: 11px;padding: 25px;padding-top: 30px;padding-bottom: 30px;">
+
+                          <div class="message-wrap svelte-1uvwjgr" style="width: 100%;">
+                              <div class="message-row user-row svelte-1uvwjgr" style="width: 100%;">
+                                  <div class="avatar-container svelte-1uvwjgr">
+                                      <img class="avatar-image svelte-1uvwjgr" src="./static/images/user.png"
+                                          alt="avatar-user">
+                                  </div>
+                                  <div data-testid="user" class="message user svelte-1uvwjgr" dir="ltr"
+                                      style="border-style: solid;">
+                                      <!-- 下面的span靠右对齐 -->
+                                      <span class="md svelte-9tftx4 chatbot" style="text-align: left;">
+                                          <p><audio playsinline="" controls="">
+                                                  <source type="audio/mp3"
+                                                      src="./static/images/4.mp3">
+                                              </audio>
+                                          </p>
+                                          <p style="color: gray; font-size: 1.0em;">(Transcription: What religion is represented at the top of the tower?)</p>
+                                      </span>
+                                      <img style="display: inline-block;width: 250px;max-height: 400px;float: right;margin-top:0.7em"
+                                          src="./static/images/4.jpg">
+                                  </div>
+                              </div>
+
+
+                              <div class="message-row bot-row svelte-1uvwjgr">
+                                  <div class="avatar-container svelte-1uvwjgr">
+                                      <img class="avatar-image svelte-1uvwjgr" src="./static/images/logo_small.png"
+                                          alt="avatar-bot">
+                                  </div>
+                                  <div data-testid="bot" class="message bot svelte-1uvwjgr" dir="ltr"
+                                      style="border-style: solid;">
+                                      <span class="md svelte-9tftx4 chatbot">
+                                          <p style="color: black; font-size: 1.0em;">The top of the clock tower is decorated with a cross, which represents Christianity.
+                                          </p>
+                                      </span>
+
+                                  </div>
+                              </div>
+
+                          </div>
+                      </div>
+                  </div>
+              </div>
+              
+              <div class="content has-text-justified" style="width: 70pm">
+
+                <div class="content has-text-justified" style="width: 70pm;margin-top: 1.5em">
+
+                    <div class="wrapper svelte-nab2ao"
+                        style="box-sizing: border-box;border-width: 2px;border-style: solid;border-color: #f66c0f;border-radius: 11px;padding: 25px;padding-top: 30px;padding-bottom: 30px;">
+
+                        <div class="message-wrap svelte-1uvwjgr" style="width: 100%;">
+                          <div class="message-row user-row svelte-1uvwjgr" style="width: 100%;">
+                            <div class="avatar-container svelte-1uvwjgr">
+                                <img class="avatar-image svelte-1uvwjgr" src="./static/images/user.png"
+                                    alt="avatar-user">
+                            </div>
+                            <div data-testid="user" class="message user svelte-1uvwjgr" dir="ltr"
+                                style="border-style: solid;">
+                                <!-- 下面的span靠右对齐 -->
+                                <span class="md svelte-9tftx4 chatbot" style="text-align: left;">
+                                    <p><audio playsinline="" controls="">
+                                            <source type="audio/mp3"
+                                                src="./static/images/5.mp3">
+                                        </audio>
+                                    </p>
+                                    <p style="color: gray; font-size: 1.0em;">(Transcription: What is powering the bike?)</p>
+                                </span>
+                                <img style="display: inline-block;width: 250px;max-height: 400px;float: right;margin-top:0.7em"
+                                    src="./static/images/5.jpg">
+                            </div>
+                        </div>
+
+
+                        <div class="message-row bot-row svelte-1uvwjgr">
+                            <div class="avatar-container svelte-1uvwjgr">
+                                <img class="avatar-image svelte-1uvwjgr" src="./static/images/logo_small.png"
+                                    alt="avatar-bot">
+                            </div>
+                            <div data-testid="bot" class="message bot svelte-1uvwjgr" dir="ltr"
+                                style="border-style: solid;">
+                                <span class="md svelte-9tftx4 chatbot">
+                                    <p style="color: black; font-size: 1.0em;">The bikes are being powered by the dogs, who are pulling the bicycles through the grass.
+                                    </p>
+                                </span>
+
+                            </div>
+                        </div>
+
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+              <!--          End  Example-3-->
+
+              <!--            Example-4-->
+              <h3 class="title is-4" style="margin-top: 0em">• Example-4: Long Speech Understanding</h3>
+
+              <div class="content has-text-justified" style="width: 70pm">
+
+                  <div class="content has-text-justified" style="width: 70pm;margin-top: 1.5em">
+
+                      <div class="wrapper svelte-nab2ao"
+                          style="box-sizing: border-box;border-width: 2px;border-style: solid;border-color: #f66c0f;border-radius: 11px;padding: 25px;padding-top: 30px;padding-bottom: 30px;">
+
+                          <div class="message-wrap svelte-1uvwjgr" style="width: 100%;">
+                              
+                              <div class="message-row user-row svelte-1uvwjgr" style="width: 100%;">
+                                  <div class="avatar-container svelte-1uvwjgr">
+                                      <img class="avatar-image svelte-1uvwjgr" src="./static/images/user.png"
+                                          alt="avatar-user">
+                                  </div>
+                                  <div data-testid="user" class="message user svelte-1uvwjgr" dir="ltr"
+                                      style="border-style: solid;">
+                                      <!-- 下面的span靠右对齐 -->
+                                      <span class="md svelte-9tftx4 chatbot" style="text-align: left;">
+                                          <p><audio playsinline="" controls="">
+                                                  <source type="audio/mp3"
+                                                      src="./static/images/6.mp3">
+                                              </audio>
+                                          </p>
+                                          <p style="color: black; font-size: 1.0em;">
+                                            What is the topic of the article?
+                                          </p>
+                                      </span>
+                                  </div>
+                              </div>
+
+
+                              <div class="message-row bot-row svelte-1uvwjgr">
+                                  <div class="avatar-container svelte-1uvwjgr">
+                                      <img class="avatar-image svelte-1uvwjgr" src="./static/images/logo_small.png"
+                                          alt="avatar-bot">
+                                  </div>
+                                  <div data-testid="bot" class="message bot svelte-1uvwjgr" dir="ltr"
+                                      style="border-style: solid;">
+                                      <span class="md svelte-9tftx4 chatbot">
+                                          <p style="color: black; font-size: 1.0em;">
+                                            The importance of learning English.
+                                          </p>
+                                      </span>
+                                  </div>
+                              </div>
+
+
+                          </div>
+                      </div>
+                  </div>
+              </div>
+
+              <!--          End  Example-4-->
+
+              <!--            Example-5-->
+              <h3 class="title is-4" style="margin-top: 3em">• Example-5: Text + video</h3>
+              <div class="content has-text-justified" style="width: 70pm">
+
+                  <div class="content has-text-justified" style="width: 70pm;margin-top: 1.5em">
+
+                      <div class="wrapper svelte-nab2ao"
+                          style="box-sizing: border-box;border-width: 2px;border-style: solid;border-color: #f66c0f;border-radius: 11px;padding: 25px;padding-top: 30px;padding-bottom: 30px;">
+
+                          <div class="message-wrap svelte-1uvwjgr" style="width: 100%;">
+
+                              <div class="message-row user-row svelte-1uvwjgr" style="width: 100%;">
+                                  <div class="avatar-container svelte-1uvwjgr">
+                                      <img class="avatar-image svelte-1uvwjgr" src="./static/images/user.png"
+                                          alt="avatar-user">
+                                  </div>
+                                  <div data-testid="user" class="message user svelte-1uvwjgr" dir="ltr"
+                                      style="border-style: solid;">
+                                      <!-- 下面的span靠右对齐 -->
+                                      <span class="md svelte-9tftx4 chatbot" style="text-align: left;">
+                                          <p>Describe this video in detail.​​</p>
+                                          <p><video src="./static/images/8.mp4" style="display: inline-block;width: 500px;max-height: 400px;float: right;margin-top:0.7em" playsinline="" controls=""></video> 
+                                          </p>
+                                      </span>
+                                  </div>
+                              </div>
+
+
+                              <div class="message-row bot-row svelte-1uvwjgr">
+                                  <div class="avatar-container svelte-1uvwjgr">
+                                      <img class="avatar-image svelte-1uvwjgr" src="./static/images/logo_small.png"
+                                          alt="avatar-bot">
+                                  </div>
+                                  <div data-testid="bot" class="message bot svelte-1uvwjgr" dir="ltr"
+                                      style="border-style: solid;">
+                                      <span class="md svelte-9tftx4 chatbot">
+                                          <p>The video shows a group of people enjoying a day out on a river. They are seen riding down the river on inflatable tubes, taking in the beautiful scenery and having a great time. The group is seen drinking beer and enjoying each other's company while floating down the river. The video captures the essence of a perfect day outdoors with friends, surrounded by nature.</p>
+                                      </span>
+                                  </div>
+                              </div>
+
+                          </div>
+                      </div>
+                  </div>
+
+                  <div class="wrapper svelte-nab2ao"
+                      style="box-sizing: border-box;border-width: 2px;border-style: solid;border-color: #f66c0f;border-radius: 11px;padding: 25px;padding-top: 30px;padding-bottom: 30px;">
+
+                      <div class="message-wrap svelte-1uvwjgr" style="width: 100%;">
+
+                          <div class="message-row user-row svelte-1uvwjgr" style="width: 100%;">
+                              <div class="avatar-container svelte-1uvwjgr">
+                                  <img class="avatar-image svelte-1uvwjgr" src="./static/images/user.png"
+                                      alt="avatar-user">
+                              </div>
+                              <div data-testid="user" class="message user svelte-1uvwjgr" dir="ltr"
+                                  style="border-style: solid;">
+                                  <!-- 下面的span靠右对齐 -->
+                                  <span class="md svelte-9tftx4 chatbot" style="text-align: left;">
+                                    <p>what can you see and hear from the video?​​</p>
+                                    <p><video src="./static/images/7.mkv" style="display: inline-block;width: 500px;max-height: 400px;float: right;margin-top:0.7em" playsinline="" controls=""></video> 
+                                    </p>
+                                  </span>
+                              </div>
+                          </div>
+
+                          <div class="message-row bot-row svelte-1uvwjgr">
+                              <div class="avatar-container svelte-1uvwjgr">
+                                  <img class="avatar-image svelte-1uvwjgr" src="./static/images/logo_small.png"
+                                      alt="avatar-bot">
+                              </div>
+                              <div data-testid="bot" class="message bot svelte-1uvwjgr" dir="ltr"
+                                  style="border-style: solid;">
+                                  <span class="md svelte-9tftx4 chatbot">
+                                      <p>The video shows a group of people playing instruments in a large orchestra, with a conductor leading them. The conductor is wearing a suit and tie, and the orchestra is dressed in formal attire. The video also shows the audience watching the performance, and the orchestra is playing a piece of music.</p>
+                                  </span>
+                              </div>
+                          </div>
+
+                          <div class="message-row user-row svelte-1uvwjgr" style="width: 100%;">
+                            <div class="avatar-container svelte-1uvwjgr">
+                                <img class="avatar-image svelte-1uvwjgr" src="./static/images/user.png"
+                                    alt="avatar-user">
+                            </div>
+                            <div data-testid="user" class="message user svelte-1uvwjgr" dir="ltr"
+                                style="border-style: solid;">
+                                <!-- 下面的span靠右对齐 -->
+                                <span class="md svelte-9tftx4 chatbot" style="text-align: left;">
+                                  <p>what can you hear in the audio?​​</p>
+                                </span>
+                            </div>
+                        </div>
+
+                        <div class="message-row bot-row svelte-1uvwjgr">
+                            <div class="avatar-container svelte-1uvwjgr">
+                                <img class="avatar-image svelte-1uvwjgr" src="./static/images/logo_small.png"
+                                    alt="avatar-bot">
+                            </div>
+                            <div data-testid="bot" class="message bot svelte-1uvwjgr" dir="ltr"
+                                style="border-style: solid;">
+                                <span class="md svelte-9tftx4 chatbot">
+                                    <p>The audio in the video features the sound of the orchestra playing the music, with the conductor leading the way. The woman playing the flute is also featured in the audio, and her performance is highlighted.</p>
+                                </span>
+                            </div>
+                        </div>
+
+                      </div>
+                  </div>
+              </div>
+              <!--          End  Example-5-->
+
+              
+
+              <br />
+          </div>
+      </div>
+</section>
+
+</section>
+
+  <section class="section" id="BibTeX">
+    <div class="container is-max-desktop content">
+      <h2 class="title">BibTeX</h2>
+      <pre><code>
+   @misc{li2024unimoe,
+      title={Uni-MoE: Scaling Unified Multimodal LLMs with Mixture of Experts}, 
+      author={Yunxin Li and Shenyuan Jiang and Baotian Hu and Longyue Wang and Wanqi Zhong and Wenhan Luo and Lin Ma and Min Zhang},
+      year={2024},
+      eprint={2405.11273},
+      archivePrefix={arXiv},
+      primaryClass={cs.AI}
+    }
+  </code></pre>
+    </div>
+  </section>
+  
+  <section class="section" id="Acknowledgement" style="background-color:#efeff081">
+    <div class="container is-max-desktop content">
+      <h2 class="title">Acknowledgement</h2>
+      <p>
+        This website is adapted from <a
+        href="https://github.com/nerfies/nerfies.github.io">Nerfies</a>, licensed under a <a rel="license" href="http://creativecommons.org/licenses/by-sa/4.0/">Creative
+        Commons Attribution-ShareAlike 4.0 International License</a>.  We thank the LLaMA team for giving us access to their models, and open-source projects, including Vicuna, BEATs and whisper.
+      </p>
+
+      <p>
+<b>Usage and License Notices</b>: The data, code and checkpoint is intended and licensed for research use only. They are also restricted to uses that follow the license agreement of CLIP, BEATs, whisper, LLaMA and Vicuna. The dataset and models trained using the dataset should not be used outside of research purposes.
+</p>  
+    </div>
+  </section>
+
+  <script>
+    // Handle message showing
+    function createChatRow(sender, text, imageSrc) {
+      var article = document.createElement("article");
+      article.className = "media"
+
+      var figure = document.createElement("figure");
+      figure.className = "media-left";
+
+      var span = document.createElement("span");
+      span.className = "icon is-large";
+
+      var icon = document.createElement("i");
+      icon.className = "" + (sender === "User" ? " fa-myuser " : sender === "Uni-MoE" ? " fa-mylogo " : sender === "X-Instruct" ? " fa-myrobot" : "");
+
+      var media = document.createElement("div");
+      media.className = "media-content";
+
+      var content = document.createElement("div");
+      content.className = "content";
+
+      var para = document.createElement("p");
+
+      // wrap text in pre tag to preserve whitespace and line breaks
+      var pre_text = document.createElement("pre");
+      pre_text.style = "background-color: white; font-size: 18px; font-family: Arial; padding: 0; margin: 0; white-space: pre-wrap; word-wrap: break-word; background: transparent; ";
+      var paraText = document.createTextNode(text);
+      pre_text.appendChild(paraText);
+
+      var strong = document.createElement("strong");
+      strong.innerHTML = sender;
+      var br = document.createElement("br");
+
+      para.appendChild(strong);
+      para.appendChild(br);
+      para.appendChild(pre_text);
+
+      // Add image if imageSrc[0] is provided
+      if (imageSrc && imageSrc[0]!='') {
+        var img = document.createElement("img");
+        img.src = imageSrc[0];
+        img.style = "max-width: 100%; max-height: 300px;"; // Adjust the style as needed
+        para.appendChild(img);
+      }
+      // Add audio if imageSrc[1] is provided
+      //<audio playsinline="" controls=""> <source type="audio/wav" src="./static/images/test.wav"></audio>
+      if (imageSrc && imageSrc[1]!='' && imageSrc.length >1) {
+        var br1 = document.createElement("br");
+        para.appendChild(br1);
+        if (imageSrc && imageSrc[0]!=''){
+          var spc = document.createElement("div");
+          spc.style = "height: 20px;"
+          para.appendChild(spc);
+        }
+        var aud = document.createElement("audio");
+        aud.playsinline = "true";
+        aud.controls = "true";
+        aud.width="500";
+        aud.style = "max-width: 100%; max-height: 300px;"
+        var inaud = document.createElement("source");
+        inaud.type="audio/wav";
+        inaud.src=imageSrc[1];
+        aud.appendChild(inaud);
+        para.appendChild(aud);
+      }
+      
+      // Add video if imageSrc[2] is provided
+      // <video src="./static/images/demo9/r37zpq_g.mp4" style="display: inline-block;" width="500" playsinline="" controls=""></video> 
+      if (imageSrc && imageSrc[2]!='' && imageSrc.length >2) {
+        var br2 = document.createElement("br");
+         para.appendChild(br2);
+        var vid = document.createElement("video");
+        vid.src = imageSrc[2];
+        vid.style = "display: inline-block;";
+        vid.width = "500";
+        vid.playsinline = "true"; 
+        vid.controls = "true";
+        para.appendChild(vid);
+      }
+      console.log(para.outerHTML);
+
+      content.appendChild(para);
+      media.appendChild(content);
+      span.appendChild(icon);
+      figure.appendChild(span);
+      if (sender !== "Description") {
+        article.appendChild(figure);
+      };
+      article.appendChild(media);
+      return article;
+    }
+
+    function addMessageToChatHistory(sender, message, imageSrc) {
+      const chatHistory = document.querySelector('.chat-history');
+      const chatRow = createChatRow(sender, message, imageSrc);
+      chatHistory.appendChild(chatRow);
+      chatHistory.scrollTop = chatHistory.scrollHeight;
+    }
+
+    function clearChatHistory() {
+      const chatHistory = document.querySelector('.chat-history');
+      chatHistory.innerHTML = "";
+    }
+
+    // 
+    const conversations = [
+      {
+        "description": "leopard",
+        "turns": [
+          ["User", "", "./static/images/3.jpg"],
+          ["User", "Describe the image.​​"],
+          ["Uni-MoE", "The image features a large leopard walking across a grassy area, close to a body of water. The leopard is positioned in the center of the scene, with its reflection visible in the water. The water appears to be a lake or a pond, providing a serene backdrop for the leopard's stroll."],
+          ["X-Instruct", "A leopard walking near a body of water."],
+        ]
+      },
+      {
+        "description": "Concert",
+        "turns": [
+          ["User", "", "./static/images/blank.png", "./static/images/1.mp3"],
+          ["User", "Where is this sound take place?​​"],
+          ["Uni-MoE", "Concert."],
+          ["X-Instruct", "Arena."],
+        ]
+      },
+      {
+        "description": "Instruments",
+        "turns": [
+          ["User", "", "", "./static/images/2.mp3"],
+          ["User", "Name all the instruments you can hear. ​​"],
+          ["Uni-MoE", "Accordion, drums, guitars, trumpets, violins, and cellos."],
+          ["X-Instruct", "Music."],
+        ]
+      },
+      {
+        "description": "tower",
+        "turns": [
+          ["User", "", "./static/images/4.jpg", "./static/images/4.mp3"],
+          ["Uni-MoE", "The top of the clock tower is decorated with a cross, which represents Christianity."],
+          ["X-Instruct", "No."],
+        ]
+      },
+      {
+        "description": "dog",
+        "turns": [
+          ["User", "", "./static/images/5.jpg", "./static/images/5.mp3"],
+          ["Uni-MoE", "The bikes are being powered by the dogs, who are pulling the bicycles through the grass."],
+          ["X-Instruct", "No."],
+        ]
+      },
+      {
+        "description": "lspc",
+        "turns": [
+          ["User", "", "", "./static/images/6.mp3"],
+          ["User", "What is the topic of the article?"],
+          ["Uni-MoE", "The importance of learning English."],
+          ["X-Instruct", "Mechanics."],
+        ]
+      },
+      {
+        "description": "musical",
+        "turns": [
+          ["User", "", "", "", "./static/images/8.mp4"],
+          ["User", "Describe the video."],
+          ["Uni-MoE", "The video shows a group of people enjoying a day out on a river. They are seen riding down the river on inflatable tubes, taking in the beautiful scenery and having a great time. The group is seen drinking beer and enjoying each other's company while floating down the river. The video captures the essence of a perfect day outdoors with friends, surrounded by nature."],
+          ["X-Instruct", "Two people are floating down a river."],
+        ]
+      },
+      {
+        "description": "musical",
+        "turns": [
+          ["User", "", "", "", "./static/images/7.mkv"],
+          ["User", "what can you see and hear from the video?"],
+          ["Uni-MoE", "The video shows a group of people playing instruments in a large orchestra, with a conductor leading them. The conductor is wearing a suit and tie, and the orchestra is dressed in formal attire. The video also shows the audience watching the performance, and the orchestra is playing a piece of music."],
+          ["X-Instruct", "A woman is playing the violin."],
+          ["User", "what can you hear in the audio?"],
+          ["Uni-MoE", "The audio in the video features the sound of the orchestra playing the music, with the conductor leading the way. The woman playing the flute is also featured in the audio, and her performance is highlighted."],
+        ]
+      },
+    ];
+
+    // The current image index
+    let currentIndex = 0;
+
+    // The function to update the displayed chat history
+    function update_dialog_demo() {
+      // Clear the chat history
+      clearChatHistory();
+
+      for (let i = 0; i < conversations[currentIndex].turns.length; i++) {
+        if (conversations[currentIndex].turns[i].length == 2) {
+          addMessageToChatHistory(conversations[currentIndex].turns[i][0], conversations[currentIndex].turns[i][1]);
+        }
+        else {
+          const mmlist = conversations[currentIndex].turns[i].slice(2,conversations[currentIndex].turns[i].length);
+          addMessageToChatHistory(conversations[currentIndex].turns[i][0], conversations[currentIndex].turns[i][1], mmlist);
+            
+        }
+      }
+
+      // scroll to the top of the chat history
+      document.querySelector('.chat-history').scrollTop = 0;
+    }
+
+    // Initialize the displayed image
+    update_dialog_demo();
+
+    // Event listeners for the buttons
+    document.getElementById('prev-question').addEventListener('click', () => {
+      currentIndex = (currentIndex - 1 + conversations.length) % conversations.length;
+      update_dialog_demo();
+    });
+
+    document.getElementById('next-question').addEventListener('click', () => {
+      currentIndex = (currentIndex + 1) % conversations.length;
+      update_dialog_demo();
+    });
+
+
+  </script>
+
+</body>
